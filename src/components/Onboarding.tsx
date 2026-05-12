@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -11,7 +12,6 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
 
 const SPLASH_MS = 1300;
 
@@ -19,12 +19,14 @@ const COLORS = {
   text: '#111827',
   muted: '#8B95A1',
   mint: '#7BCBC6',
-  deepMint: '#1DB7A8',
-  navy: '#07192D',
   line: '#D1D5DB',
 };
 
-export function OnboardingGate({ children }: { children: React.ReactNode }) {
+export function OnboardingGate({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [showSplash, setShowSplash] = useState(true);
   const [inviteAccepted, setInviteAccepted] = useState(false);
 
@@ -34,30 +36,61 @@ export function OnboardingGate({ children }: { children: React.ReactNode }) {
   }, []);
 
   if (showSplash) return <SplashScreen />;
-  if (!inviteAccepted) return <InviteCodeScreen onComplete={() => setInviteAccepted(true)} />;
+
+  if (!inviteAccepted) {
+    return (
+      <InviteCodeScreen onComplete={() => setInviteAccepted(true)} />
+    );
+  }
+
   return <>{children}</>;
 }
 
 function SplashScreen() {
   const { width, height } = useWindowDimensions();
-  const scale = Math.min(Math.max(Math.min(width, height) / 390, 0.88), 1.16);
+  const scale = Math.min(
+    Math.max(Math.min(width, height) / 390, 0.88),
+    1.16,
+  );
 
   return (
     <SafeAreaView style={styles.screen}>
       <View style={styles.center}>
-        <SafePathLogo size={154 * scale} />
+        <Image
+          source={require('../../assets/safepath-logo.png')}
+          style={[
+            styles.logoImage,
+            {
+              width: 154 * scale,
+              height: 154 * scale,
+            },
+          ]}
+        />
+
         <Text style={[styles.brand, { fontSize: 43 * scale }]}>
           SAFE<Text style={styles.brandMint}>PATH</Text>
         </Text>
       </View>
-      <View style={[styles.splashLoader, { bottom: Math.max(36, height * 0.055) }]}>
+
+      <View
+        style={[
+          styles.splashLoader,
+          {
+            bottom: Math.max(36, height * 0.055),
+          },
+        ]}
+      >
         <ActivityIndicator color={COLORS.mint} />
       </View>
     </SafeAreaView>
   );
 }
 
-function InviteCodeScreen({ onComplete }: { onComplete: () => void }) {
+function InviteCodeScreen({
+  onComplete,
+}: {
+  onComplete: () => void;
+}) {
   const { width } = useWindowDimensions();
   const scale = Math.min(Math.max(width / 390, 0.88), 1.12);
   const [code, setCode] = useState('');
@@ -75,16 +108,32 @@ function InviteCodeScreen({ onComplete }: { onComplete: () => void }) {
 
   return (
     <SafeAreaView style={styles.screen}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.inviteContainer}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.inviteContainer}
+      >
         <View style={styles.inviteTop}>
-          <SafePathLogo size={146 * scale} />
+          <Image
+            source={require('../../assets/safepath-logo.png')}
+            style={[
+              styles.logoImage,
+              {
+                width: 146 * scale,
+                height: 146 * scale,
+              },
+            ]}
+          />
+
           <Text style={[styles.slogan, { fontSize: 28 * scale }]}>
             모두의 <Text style={styles.sloganMint}>안전한</Text> 길을 만들다.
           </Text>
         </View>
 
         <View style={styles.form}>
-          <Text style={[styles.formTitle, { fontSize: 18 * scale }]}>초대코드를 입력해주세요</Text>
+          <Text style={[styles.formTitle, { fontSize: 18 * scale }]}>
+            초대코드를 입력해주세요
+          </Text>
+
           <TextInput
             value={code}
             onChangeText={(value) => {
@@ -97,12 +146,22 @@ function InviteCodeScreen({ onComplete }: { onComplete: () => void }) {
             autoCorrect={false}
             returnKeyType="done"
             onSubmitEditing={submit}
-            style={[styles.input, { fontSize: 17 * scale }]}
+            style={[
+              styles.input,
+              {
+                fontSize: 17 * scale,
+              },
+            ]}
           />
+
           {!!error && <Text style={styles.errorText}>{error}</Text>}
+
           <TouchableOpacity
             activeOpacity={0.86}
-            style={[styles.confirmButton, !code.trim() && styles.confirmDisabled]}
+            style={[
+              styles.confirmButton,
+              !code.trim() && styles.confirmDisabled,
+            ]}
             onPress={submit}
           >
             <Text style={styles.confirmText}>초대 코드 확인</Text>
@@ -113,46 +172,73 @@ function InviteCodeScreen({ onComplete }: { onComplete: () => void }) {
   );
 }
 
-function SafePathLogo({ size }: { size: number }) {
-  const shieldSize = size * 0.72;
-
-  return (
-    <View style={[styles.logoBox, { width: size, height: size, borderRadius: size * 0.24 }]}>
-      <Ionicons name="shield-outline" size={shieldSize} color={COLORS.deepMint} />
-      <View style={styles.logoCenter}>
-        <Ionicons name="people" size={size * 0.37} color="#fff" />
-      </View>
-      <View style={styles.logoPlus}>
-        <Ionicons name="add" size={size * 0.23} color={COLORS.deepMint} />
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: '#fff' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  splashLoader: { position: 'absolute', alignSelf: 'center' },
-  logoBox: {
-    backgroundColor: COLORS.navy,
+  screen: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+
+  center: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#111827',
-    shadowOpacity: 0.15,
-    shadowRadius: 22,
-    shadowOffset: { width: 0, height: 14 },
-    elevation: 6,
   },
-  logoCenter: { position: 'absolute', left: '31.5%', top: '36.5%' },
-  logoPlus: { position: 'absolute', right: '13%', top: '26%' },
-  brand: { color: COLORS.text, fontWeight: '900', letterSpacing: 0, marginTop: 58 },
-  brandMint: { color: COLORS.mint },
-  inviteContainer: { flex: 1, paddingHorizontal: 35, justifyContent: 'center' },
-  inviteTop: { alignItems: 'center', marginBottom: 86 },
-  slogan: { color: COLORS.text, fontWeight: '900', textAlign: 'center', letterSpacing: 0, marginTop: 50 },
-  sloganMint: { color: COLORS.mint },
-  form: { width: '100%', alignSelf: 'center' },
-  formTitle: { color: COLORS.text, fontWeight: '900', textAlign: 'center', marginBottom: 26 },
+
+  splashLoader: {
+    position: 'absolute',
+    alignSelf: 'center',
+  },
+
+  logoImage: {
+    resizeMode: 'contain',
+  },
+
+  brand: {
+    color: COLORS.text,
+    fontWeight: '900',
+    letterSpacing: 0,
+    marginTop: 58,
+  },
+
+  brandMint: {
+    color: COLORS.mint,
+  },
+
+  inviteContainer: {
+    flex: 1,
+    paddingHorizontal: 35,
+    justifyContent: 'center',
+  },
+
+  inviteTop: {
+    alignItems: 'center',
+    marginBottom: 86,
+  },
+
+  slogan: {
+    color: COLORS.text,
+    fontWeight: '900',
+    textAlign: 'center',
+    letterSpacing: 0,
+    marginTop: 50,
+  },
+
+  sloganMint: {
+    color: COLORS.mint,
+  },
+
+  form: {
+    width: '100%',
+    alignSelf: 'center',
+  },
+
+  formTitle: {
+    color: COLORS.text,
+    fontWeight: '900',
+    textAlign: 'center',
+    marginBottom: 26,
+  },
+
   input: {
     height: 64,
     borderWidth: 1.5,
@@ -164,7 +250,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     backgroundColor: '#fff',
   },
-  errorText: { color: '#E24743', fontSize: 13, fontWeight: '700', marginTop: 9, textAlign: 'center' },
+
+  errorText: {
+    color: '#E24743',
+    fontSize: 13,
+    fontWeight: '700',
+    marginTop: 9,
+    textAlign: 'center',
+  },
+
   confirmButton: {
     height: 58,
     borderRadius: 10,
@@ -173,6 +267,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginTop: 20,
   },
-  confirmDisabled: { opacity: 0.68 },
-  confirmText: { color: '#fff', fontSize: 17, fontWeight: '900' },
+
+  confirmDisabled: {
+    opacity: 0.68,
+  },
+
+  confirmText: {
+    color: '#fff',
+    fontSize: 17,
+    fontWeight: '900',
+  },
 });
